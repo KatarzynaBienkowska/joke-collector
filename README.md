@@ -49,3 +49,11 @@ Move away Joke fetching from the `gateway` app to new `emitter` app.
 - [ ] The `gateway` app should not directly 'ask' the `emitter` for a Joke; it should react to what the `emitter` produces.
 - [ ] The `emitter` and `gateway` apps should communicate using message broker of choice - preferably RabbitMQ.
   - [ ] Provide `docker run` command or `docker compose` file to run the broker locally.
+
+## Test
+
+To run the `frontend` tests:
+
+```sh
+npx nx run frontend:test
+```

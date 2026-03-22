@@ -15,9 +15,12 @@
     "@swc-node/register": "~1.11.1",
     "@swc/core": "~1.15.11",
     "@swc/helpers": "~0.5.18",
+    "@testing-library/jest-dom": "~6.9.1",
+    "@testing-library/react": "~16.3.2",
+    "@testing-library/user-event": "~14.6.1",
     "@types/node": "20.19.9",
-    "@vitejs/plugin-vue": "^6.0.1",
-    "@vitest/coverage-v8": "^4.0.0",
+    "@vitejs/plugin-react": "~5.2.0",
+    "@vitest/coverage-v8": "~4.0.0",
     "@vitest/ui": "~4.0.0",
     "@vue/test-utils": "~2.4.6",
     "esbuild": "~0.27.2",
@@ -33,6 +36,14 @@
     "vue-tsc": "~2.2.8"
   },
   "dependencies": {
-    "vue": "~3.5.13"
+    "@emotion/react": "~11.14.0",
+    "@emotion/styled": "~11.14.1",
+    "@mui/material": "~7.3.9",
+    "@mui/x-data-grid": "~8.27.5",
+    "@nx/react": "~22.6.0",
+    "@types/react": "~19.2.14",
+    "@types/react-dom": "~19.2.3",
+    "react": "~19.2.4",
+    "react-dom": "~19.2.4"
   }
 }
