@@ -7,7 +7,6 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
 import { Joke } from './types';
-import { useJokeFeed } from './useJokeFeed';
 
 const columns = [
   { field: 'id', headerName: 'ID', width: 10 },
@@ -41,12 +40,8 @@ const App = () => {
   const [jokes, setJokes] = useState<Joke[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [feedOn, setFeedOn] = useState<boolean>(false);
 
-  const { lastError, setOnJoke, startFeed, stopFeed } = useJokeFeed(
-    'ws://localhost:3000/ws',
-  );
-
+  // TASK 1: Fetch joke on button click
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -62,23 +57,42 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    setOnJoke((joke: Joke) => setJokes((prev) => [...prev, joke]));
-  }, [setOnJoke]);
+  // TASK 2: Connect to WebSocket joke feed
+  // const [feedOn, setFeedOn] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (lastError) setError(lastError);
-  }, [lastError]);
+  // const { lastError, setOnJoke, startFeed, stopFeed } = useJokeFeed(
+  //   'ws://localhost:3000/ws',
+  // );
 
-  const toggleFeed = () => {
-    if (!feedOn) {
-      startFeed();
-      setFeedOn(true);
-    } else {
-      stopFeed();
-      setFeedOn(false);
-    }
-  };
+  // useEffect(() => {
+  //   setOnJoke((joke: Joke) => setJokes((prev) => [...prev, joke]));
+  // }, [setOnJoke]);
+
+  // useEffect(() => {
+  //   if (lastError) setError(lastError);
+  // }, [lastError]);
+
+  // const toggleFeed = () => {
+  //   if (!feedOn) {
+  //     startFeed();
+  //     setFeedOn(true);
+  //   } else {
+  //     stopFeed();
+  //     setFeedOn(false);
+  //   }
+  // };
+
+  // TASK 3: Auto-start WebSocket feed on component mount
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:3000/ws');
+
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === 'joke') setJokes((prev) => [...prev, msg.payload]);
+    };
+
+    return () => ws.close();
+  }, []);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -87,13 +101,13 @@ const App = () => {
           <Button variant="contained" onClick={fetchData}>
             Fetch Joke
           </Button>
-          <Button
+          {/* <Button
             variant="contained"
             color={feedOn ? 'warning' : 'primary'}
             onClick={toggleFeed}
           >
             {feedOn ? 'Stop joke feed' : 'Joke feed'}
-          </Button>
+          </Button> */}
         </Box>
 
         <Box sx={{ height: 600, width: '100%' }}>

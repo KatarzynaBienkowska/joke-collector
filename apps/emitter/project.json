@@ -1,0 +1,66 @@
+{
+  "name": "emitter",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/emitter/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/apps/emitter",
+        "format": ["esm"],
+        "bundle": true,
+        "main": "apps/emitter/src/main.ts",
+        "tsConfig": "apps/emitter/tsconfig.app.json",
+        "assets": ["apps/emitter/src/assets"],
+        "generatePackageJson": true,
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": {
+            ".js": ".js"
+          }
+        }
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "esbuildOptions": {
+            "sourcemap": false,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        }
+      }
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "emitter:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "emitter:build:development"
+        },
+        "production": {
+          "buildTarget": "emitter:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/vitest:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "reportsDirectory": "../../coverage/apps/emitter"
+      }
+    }
+  }
+}

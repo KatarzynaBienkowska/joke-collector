@@ -1,73 +1,22 @@
 import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
-import { fetchJoke } from './jokeApi';
-
-type ClientMsg = { type: 'start-feed' } | { type: 'stop-feed' };
-const FEED_INTERVAL_MS = 5000;
-
-async function sendJoke(ws: WebSocket) {
-  try {
-    const joke = await fetchJoke();
-
-    if (!joke || typeof joke !== 'object') {
-      ws.send(
-        JSON.stringify({ type: 'error', message: 'Invalid API response' }),
-      );
-      return false;
-    }
-
-    // Send WS error if JokeAPI returned error
-    if (joke.error === true) {
-      ws.send(JSON.stringify({ type: 'error', message: joke.message }));
-      return false;
-    }
-
-    ws.send(JSON.stringify({ type: 'joke', payload: joke }));
-    return true;
-  } catch {
-    ws.send(JSON.stringify({ type: 'error', message: 'Joke fetch failed' }));
-    return false;
-  }
-}
+import { listenForJokes } from './rabbit';
 
 export function attachWebSocket(server: http.Server) {
   const wss = new WebSocketServer({ server, path: '/ws' });
+  const clients = new Set<WebSocket>();
 
   wss.on('connection', (ws: WebSocket) => {
-    let timer: NodeJS.Timeout | null = null;
-
-    const stop = () => {
-      if (timer) {
-        clearInterval(timer);
-        timer = null;
-      }
-    };
-
-    ws.on('message', async (raw) => {
-      try {
-        const msg = JSON.parse(String(raw)) as ClientMsg;
-
-        if (msg.type === 'start-feed') {
-          if (timer) return;
-
-          // Send the first joke
-          await sendJoke(ws);
-
-          // Start interval
-          timer = setInterval(() => sendJoke(ws), FEED_INTERVAL_MS);
-        }
-
-        if (msg.type === 'stop-feed') {
-          stop();
-          ws.send(JSON.stringify({ type: 'stopped' }));
-        }
-      } catch {
-        ws.send(JSON.stringify({ type: 'error', message: 'Bad message' }));
-      }
-    });
-
-    ws.on('close', () => stop());
+    clients.add(ws);
 
     ws.send(JSON.stringify({ type: 'hello', message: 'connected' }));
+
+    ws.on('close', () => clients.delete(ws));
+  });
+
+  listenForJokes((joke) => {
+    for (const ws of clients) {
+      ws.send(JSON.stringify({ type: 'joke', payload: joke }));
+    }
   });
 }

@@ -20,6 +20,24 @@ To run the `gateway` app (backend) run:
 npx nx run gateway:serve
 ```
 
+To run the `emitter` app run:
+
+```sh
+npx nx run emitter:serve
+```
+
+To run the message broker locally:
+
+```sh
+docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:management
+```
+
+or
+
+```sh
+docker compose up -d
+```
+
 From now on, you are the owner of this repo - you can do whatever you want - including installing new packages, using frameworks of choice, editing packages config `scripts` section etc.
 
 ## Tasks 1
