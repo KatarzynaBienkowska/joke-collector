@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
@@ -6,26 +6,8 @@ import Stack from '@mui/material/Stack';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { GridRenderCellParams, DataGrid } from '@mui/x-data-grid';
-
-type Joke = {
-  id: number;
-  category: string;
-  joke?: string;
-  setup?: string;
-  delivery?: string;
-  error: boolean;
-  flags: {
-    explicit: boolean;
-    nsfw: boolean;
-    political: boolean;
-    racist: boolean;
-    religious: boolean;
-    sexist: boolean;
-  };
-  lang: string;
-  safe: boolean;
-  type: string;
-};
+import { Joke } from './types';
+import { useJokeFeed } from './useJokeFeed';
 
 const columns = [
   { field: 'id', headerName: 'ID', width: 10 },
@@ -59,6 +41,11 @@ const App = () => {
   const [jokes, setJokes] = useState<Joke[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [feedOn, setFeedOn] = useState<boolean>(false);
+
+  const { lastError, setOnJoke, startFeed, stopFeed } = useJokeFeed(
+    'ws://localhost:3000/ws',
+  );
 
   const fetchData = async () => {
     setLoading(true);
@@ -75,12 +62,39 @@ const App = () => {
     }
   };
 
+  useEffect(() => {
+    setOnJoke((joke: Joke) => setJokes((prev) => [...prev, joke]));
+  }, [setOnJoke]);
+
+  useEffect(() => {
+    if (lastError) setError(lastError);
+  }, [lastError]);
+
+  const toggleFeed = () => {
+    if (!feedOn) {
+      startFeed();
+      setFeedOn(true);
+    } else {
+      stopFeed();
+      setFeedOn(false);
+    }
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Stack spacing={2} alignItems="flex-start">
-        <Button variant="contained" onClick={fetchData}>
-          Fetch Joke
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button variant="contained" onClick={fetchData}>
+            Fetch Joke
+          </Button>
+          <Button
+            variant="contained"
+            color={feedOn ? 'warning' : 'primary'}
+            onClick={toggleFeed}
+          >
+            {feedOn ? 'Stop joke feed' : 'Joke feed'}
+          </Button>
+        </Box>
 
         <Box sx={{ height: 600, width: '100%' }}>
           <DataGrid

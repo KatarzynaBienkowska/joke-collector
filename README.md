@@ -57,3 +57,9 @@ To run the `frontend` tests:
 ```sh
 npx nx run frontend:test
 ```
+
+To run the `gateway` (backend) tests:
+
+```sh
+npx nx run gateway:test
+```
